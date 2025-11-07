@@ -1,0 +1,148 @@
+import type { FormEvent } from 'react'
+import type { VideoDurationFilter } from '../types/youtube'
+
+interface SearchBarProps {
+  keyword: string
+  onKeywordChange: (keyword: string) => void
+  onSubmit: () => void
+  duration: VideoDurationFilter
+  onDurationChange: (value: VideoDurationFilter) => void
+  maxResults: number
+  onMaxResultsChange: (value: number) => void
+  year: number
+  onYearChange: (value: number) => void
+  regionCode: 'US' | 'JP' | 'ES' | 'ALL'
+  onRegionChange: (value: 'US' | 'JP' | 'ES' | 'ALL') => void
+  onOpenApiKeyModal: () => void
+}
+
+const filterButtonClass = (isActive: boolean) =>
+  `inline-flex items-center justify-center rounded-2xl border px-5 py-3 text-sm font-semibold transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+    isActive
+      ? 'border-transparent bg-gradient-to-r from-brand to-brand-light text-white shadow-lg shadow-brand/30'
+      : 'border-indigo-100 bg-white text-brand-dark shadow-sm hover:border-brand hover:text-brand hover:shadow-lg'
+  }`
+
+const fieldLabelClass =
+  'flex min-w-[140px] flex-col gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500'
+
+const fieldControlClass =
+  'w-full rounded-xl border border-indigo-100 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition focus:border-brand focus:outline-none focus:ring-4 focus:ring-indigo-100'
+
+export function SearchBar({
+  keyword,
+  onKeywordChange,
+  onSubmit,
+  duration,
+  onDurationChange,
+  maxResults,
+  onMaxResultsChange,
+  year,
+  onYearChange,
+  regionCode,
+  onRegionChange,
+  onOpenApiKeyModal,
+}: SearchBarProps) {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    onSubmit()
+  }
+
+  return (
+    <form
+      className="flex flex-col gap-6 rounded-3xl border border-white/70 bg-white/80 p-6 shadow-[0_24px_65px_-40px_rgba(79,70,229,0.65)] backdrop-blur"
+      onSubmit={handleSubmit}
+    >
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:gap-6">
+        <div className="relative flex-1">
+          <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xl">
+            🔍
+          </span>
+          <input
+            className="w-full rounded-2xl border border-transparent bg-white px-5 py-3 pl-12 text-base font-medium text-slate-800 shadow-[0_30px_60px_-35px_rgba(79,70,229,0.65)] transition focus:border-brand focus:outline-none focus:ring-4 focus:ring-indigo-100"
+            placeholder="단어 또는 문장을 입력하세요"
+            value={keyword}
+            onChange={(event) => onKeywordChange(event.target.value)}
+          />
+        </div>
+        <div className="flex flex-wrap items-end gap-4">
+          <button
+            type="button"
+            onClick={onOpenApiKeyModal}
+            className="inline-flex h-[50px] items-center justify-center gap-2 rounded-2xl border border-brand/70 bg-gradient-to-r from-brand to-brand-light px-6 text-sm font-semibold text-white shadow-lg shadow-brand/30 transition hover:from-brand-dark hover:to-brand"
+          >
+            API 키 설정
+          </button>
+          <label className={fieldLabelClass}>
+            <span>결과 수</span>
+            <select
+              value={maxResults}
+              onChange={(event) => onMaxResultsChange(Number(event.target.value))}
+              className={fieldControlClass}
+            >
+              <option value={20}>20개</option>
+              <option value={50}>50개</option>
+              <option value={100}>100개</option>
+            </select>
+          </label>
+          <label className={fieldLabelClass}>
+            <span>연도</span>
+            <input
+              type="number"
+              value={year}
+              onChange={(event) => onYearChange(Number(event.target.value))}
+              min={2005}
+              max={new Date().getFullYear()}
+              className={fieldControlClass}
+            />
+          </label>
+          <label className={fieldLabelClass}>
+            <span>국가</span>
+            <select
+              value={regionCode}
+              onChange={(event) =>
+                onRegionChange(event.target.value as 'US' | 'JP' | 'ES' | 'ALL')
+              }
+              className={fieldControlClass}
+            >
+              <option value="ALL">전체</option>
+              <option value="US">미국</option>
+              <option value="JP">일본</option>
+              <option value="ES">스페인</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          className={filterButtonClass(duration === 'any')}
+          onClick={() => onDurationChange('any')}
+        >
+          전체 영상
+        </button>
+        <button
+          type="button"
+          className={filterButtonClass(duration === 'long')}
+          onClick={() => onDurationChange('long')}
+        >
+          긴 영상
+        </button>
+        <button
+          type="button"
+          className={filterButtonClass(duration === 'short')}
+          onClick={() => onDurationChange('short')}
+        >
+          숏츠 영상
+        </button>
+        <button
+          type="submit"
+          className="inline-flex items-center justify-center rounded-2xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+        >
+          검색하기
+        </button>
+      </div>
+    </form>
+  )
+}
+
