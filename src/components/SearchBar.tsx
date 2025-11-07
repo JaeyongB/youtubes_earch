@@ -14,20 +14,22 @@ interface SearchBarProps {
   regionCode: 'US' | 'JP' | 'ES' | 'ALL'
   onRegionChange: (value: 'US' | 'JP' | 'ES' | 'ALL') => void
   onOpenApiKeyModal: () => void
+  ratioThreshold: number
+  onRatioChange: (value: number) => void
+  onExportExcel: () => void
 }
 
 const filterButtonClass = (isActive: boolean) =>
-  `inline-flex items-center justify-center rounded-2xl border px-5 py-2.5 text-sm font-semibold transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+  `inline-flex items-center justify-center rounded-2xl border px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
     isActive
-      ? 'border-transparent bg-gradient-to-r from-brand to-brand-light text-white shadow-brand/30'
-      : 'border-indigo-100 bg-white text-brand-dark shadow-sm hover:border-brand hover:text-brand'
+      ? 'border-transparent bg-gradient-to-r from-brand to-brand-light text-white shadow-sm shadow-brand/30'
+      : 'border-indigo-100 bg-white text-brand-dark hover:border-brand hover:text-brand'
   }`
 
-const fieldLabelClass =
-  'flex min-w-[140px] flex-col gap-1 text-xs font-semibold text-slate-500'
+const fieldLabelClass = 'flex min-w-[110px] flex-col gap-1 text-[11px] font-semibold text-slate-500'
 
 const fieldControlClass =
-  'w-full rounded-2xl border border-indigo-100 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-indigo-100'
+  'w-full rounded-2xl border border-indigo-100 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-indigo-100'
 
 export function SearchBar({
   keyword,
@@ -42,31 +44,42 @@ export function SearchBar({
   regionCode,
   onRegionChange,
   onOpenApiKeyModal,
+  ratioThreshold,
+  onRatioChange,
+  onExportExcel,
 }: SearchBarProps) {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     onSubmit()
   }
 
+  const presets = [5, 10, 15]
+
   return (
     <form
-      className="flex flex-col gap-5 rounded-3xl border border-white/70 bg-white p-6 shadow-[0_24px_65px_-45px_rgba(79,70,229,0.45)] backdrop-blur"
+      className="flex flex-col gap-4 rounded-3xl border border-white/70 bg-white p-5 shadow-[0_20px_55px_-40px_rgba(79,70,229,0.45)] backdrop-blur"
       onSubmit={handleSubmit}
     >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="relative w-full max-w-3xl">
-          <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg">
-            🔍
-          </span>
-          <input
-            className="w-full rounded-2xl border-2 border-indigo-100 bg-white px-5 py-4 pl-12 text-base font-semibold text-slate-900 shadow-inner shadow-indigo-50 transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-indigo-100"
-            placeholder="찾고 싶은 키워드를 입력하세요"
-            value={keyword}
-            onChange={(event) => onKeywordChange(event.target.value)}
-          />
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex w-full items-center gap-3">
+          <div className="relative flex-1">
+            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg">🔍</span>
+            <input
+              className="w-full rounded-2xl border-2 border-indigo-100 bg-white px-5 py-3.5 pl-12 text-base font-semibold text-slate-900 shadow-inner shadow-indigo-50 transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              placeholder="찾고 싶은 키워드를 입력하세요"
+              value={keyword}
+              onChange={(event) => onKeywordChange(event.target.value)}
+            />
+          </div>
+          <button
+            type="submit"
+            className="inline-flex h-12 min-w-[110px] items-center justify-center rounded-2xl bg-emerald-500 px-6 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition hover:bg-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+          >
+            검색하기
+          </button>
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-3">
-          <label className={`${fieldLabelClass} min-w-[120px]`}>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <label className={fieldLabelClass}>
             <span>결과 수</span>
             <select
               value={maxResults}
@@ -80,7 +93,7 @@ export function SearchBar({
               <option value={100}>100개</option>
             </select>
           </label>
-          <label className={`${fieldLabelClass} min-w-[120px]`}>
+          <label className={fieldLabelClass}>
             <span>연도</span>
             <input
               type="number"
@@ -91,7 +104,7 @@ export function SearchBar({
               className={fieldControlClass}
             />
           </label>
-          <label className={`${fieldLabelClass} min-w-[120px]`}>
+          <label className={fieldLabelClass}>
             <span>국가</span>
             <select
               value={regionCode}
@@ -109,12 +122,13 @@ export function SearchBar({
           <button
             type="button"
             onClick={onOpenApiKeyModal}
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-brand/70 bg-gradient-to-r from-brand to-brand-light px-5 text-sm font-semibold text-white shadow-sm shadow-brand/20 transition hover:from-brand-dark hover:to-brand"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-brand/70 bg-gradient-to-r from-brand to-brand-light px-4 text-sm font-semibold text-white shadow-sm shadow-brand/20 transition hover:from-brand-dark hover:to-brand"
           >
             API 키 설정
           </button>
         </div>
       </div>
+
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
@@ -137,12 +151,53 @@ export function SearchBar({
         >
           숏츠 영상
         </button>
-        <button
-          type="submit"
-          className="inline-flex items-center justify-center rounded-2xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
-        >
-          검색하기
-        </button>
+      </div>
+
+      <div className="flex flex-col gap-2 rounded-2xl border border-indigo-50 bg-indigo-50/40 p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold text-slate-700">조회수 ÷ 구독자 필터</span>
+            <span className="text-xs text-slate-500">효율이 높은 영상을 찾으려면 오른쪽 버튼을 눌러보세요.</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {presets.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => onRatioChange(preset)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                  ratioThreshold === preset
+                    ? 'bg-brand text-white shadow-sm shadow-brand/30'
+                    : 'bg-white text-brand hover:bg-indigo-100'
+                }`}
+              >
+                {preset}배 이상
+              </button>
+            ))}
+            <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-brand-dark">
+              {ratioThreshold === 0 ? '전체' : `${ratioThreshold}배 이상`}
+            </span>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2 md:flex-row md:items-center">
+          <input
+            id="ratio-range"
+            type="range"
+            min={0}
+            max={20}
+            step={1}
+            value={ratioThreshold}
+            onChange={(event) => onRatioChange(Number(event.target.value))}
+            className="h-2 flex-1 appearance-none rounded-full bg-slate-200 accent-brand"
+          />
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-500/25 transition hover:bg-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+            onClick={onExportExcel}
+          >
+            다운로드
+          </button>
+        </div>
       </div>
     </form>
   )
