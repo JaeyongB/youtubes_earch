@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
+import { createPortal } from 'react-dom'
 
 interface ApiKeyModalProps {
   isOpen: boolean
@@ -28,12 +29,15 @@ export function ApiKeyModal({
 
   if (!isOpen) return null
 
+  const modalRoot = typeof document !== 'undefined' ? document.body : null
+  if (!modalRoot) return null
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     onSubmit(value)
   }
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 py-10"
       role="dialog"
@@ -98,7 +102,8 @@ export function ApiKeyModal({
           </button>
         </footer>
       </form>
-    </div>
+    </div>,
+    modalRoot,
   )
 }
 

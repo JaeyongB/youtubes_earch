@@ -11,10 +11,8 @@ export interface VideoSearchResult {
   likes: number
   channelSubscribers: number
   channelVideoCount: number
-  contribution: string | null
-  performance: string | null
-  exposure: string | null
   tags: string[]
+  durationSeconds?: number
 }
 
 export interface ChannelDetail {
@@ -47,6 +45,7 @@ export interface ChannelInsights {
     title: string
     thumbnailUrl: string
     description: string
+    viewCount: number
   }>
   contactEmail?: string
 }

@@ -4,7 +4,12 @@ import { searchVideos } from '../services/youtubeApi'
 import type { VideoDurationFilter, VideoSearchResult } from '../types/youtube'
 import { useDebounce } from './useDebounce'
 
-export type SortField = 'title' | 'views' | 'likes' | 'channelSubscribers'
+export type SortField =
+  | 'title'
+  | 'views'
+  | 'likes'
+  | 'channelSubscribers'
+  | 'engagementRatio'
 export type SortOrder = 'asc' | 'desc'
 
 const API_KEY_STORAGE_KEY = 'youtube-search-api-key'
@@ -224,6 +229,12 @@ export function useSearchState(): UseSearchStateReturn {
         case 'channelSubscribers':
           comparison = a.channelSubscribers - b.channelSubscribers
           break
+        case 'engagementRatio': {
+          const ratioA = a.channelSubscribers > 0 ? a.views / a.channelSubscribers : a.views
+          const ratioB = b.channelSubscribers > 0 ? b.views / b.channelSubscribers : b.views
+          comparison = ratioA - ratioB
+          break
+        }
         default:
           comparison = 0
       }

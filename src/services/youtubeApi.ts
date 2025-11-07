@@ -67,6 +67,8 @@ interface YouTubeThumbnails {
   default?: YouTubeThumbnail
   medium?: YouTubeThumbnail
   high?: YouTubeThumbnail
+  standard?: YouTubeThumbnail
+  maxres?: YouTubeThumbnail
 }
 
 interface YouTubeSearchItem {
@@ -98,6 +100,11 @@ interface YouTubeVideo {
   statistics?: {
     viewCount?: string
     likeCount?: string
+  }
+  contentDetails?: {
+    duration?: string
+    dimension?: string
+    definition?: string
   }
 }
 
@@ -153,11 +160,71 @@ function extractEmailFromText(text?: string | null): string | undefined {
 
 function ensureThumbnailUrl(thumbnails?: YouTubeThumbnails): string {
   return (
+    thumbnails?.maxres?.url ||
+    thumbnails?.standard?.url ||
     thumbnails?.high?.url ||
     thumbnails?.medium?.url ||
     thumbnails?.default?.url ||
     ''
   )
+}
+
+function getThumbnailDimensions(
+  thumbnails?: YouTubeThumbnails,
+): { width: number; height: number } | null {
+  const candidates = [
+    thumbnails?.maxres,
+    thumbnails?.standard,
+    thumbnails?.high,
+    thumbnails?.medium,
+    thumbnails?.default,
+  ]
+  for (const candidate of candidates) {
+    if (candidate?.width && candidate?.height) {
+      return { width: candidate.width, height: candidate.height }
+    }
+  }
+  return null
+}
+
+function parseISODurationToSeconds(duration?: string): number | undefined {
+  if (!duration) return undefined
+  const match = duration.match(
+    /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?/,
+  )
+  if (!match) return undefined
+  const hours = Number(match[1] ?? 0)
+  const minutes = Number(match[2] ?? 0)
+  const seconds = Number(match[3] ?? 0)
+  return hours * 3600 + minutes * 60 + seconds
+}
+
+function isVerticalShort(
+  durationSeconds: number | undefined,
+  thumbnails?: YouTubeThumbnails,
+  tags?: string[],
+): boolean {
+  if (typeof durationSeconds !== 'number') return false
+  if (durationSeconds > 170) return false
+
+  const dims = getThumbnailDimensions(thumbnails)
+  if (dims) {
+    const ratio = dims.width / dims.height
+    if (!Number.isFinite(ratio) || ratio === 0) return false
+    const target = 9 / 16
+    if (Math.abs(ratio - target) <= 0.08) {
+      return true
+    }
+    if (ratio < 0.75) {
+      return true
+    }
+  }
+
+  if (tags && tags.some((tag) => tag.toLowerCase().includes('short'))) {
+    return true
+  }
+
+  return false
 }
 
 function chunkArray<T>(items: T[], chunkSize: number): T[][] {
@@ -303,7 +370,7 @@ export async function searchVideos({
           params: {
             key: trimmedApiKey,
             id: ids.join(','),
-            part: 'snippet,statistics',
+            part: 'snippet,statistics,contentDetails',
           },
         }),
       ),
@@ -342,6 +409,8 @@ export async function searchVideos({
     }
 
     const results: VideoSearchResult[] = []
+    const isShortQuery = duration === 'short'
+
     limitedSearchItems.forEach((item) => {
       const video = videoMap.get(item.id.videoId)
       if (!video) {
@@ -352,6 +421,18 @@ export async function searchVideos({
       const thumbnailUrl =
         ensureThumbnailUrl(video.snippet.thumbnails) ||
         ensureThumbnailUrl(item.snippet.thumbnails)
+
+      const durationSeconds = parseISODurationToSeconds(video.contentDetails?.duration)
+
+      if (isShortQuery) {
+        const combinedTags = [
+          ...(video.snippet.tags ?? []),
+          ...(item.snippet.tags ?? []),
+        ]
+        if (!isVerticalShort(durationSeconds, video.snippet.thumbnails, combinedTags)) {
+          return
+        }
+      }
 
       results.push({
         videoId: video.id,
@@ -366,10 +447,8 @@ export async function searchVideos({
         likes: Number(video.statistics?.likeCount ?? 0),
         channelSubscribers: Number(channel?.statistics?.subscriberCount ?? 0),
         channelVideoCount: Number(channel?.statistics?.videoCount ?? 0),
-        contribution: null,
-        performance: null,
-        exposure: null,
         tags: video.snippet.tags ?? item.snippet.tags ?? [],
+        durationSeconds,
       })
     })
 
@@ -514,6 +593,7 @@ export async function fetchChannelInsights(
         title: video.title,
         thumbnailUrl: video.thumbnailUrl,
         description: detail?.snippet.description ?? '',
+        viewCount: video.viewCount,
       }
     })
 

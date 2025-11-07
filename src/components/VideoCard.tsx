@@ -1,10 +1,17 @@
 import type { VideoSearchResult } from '../types/youtube'
 
-function formatNumber(num: number) {
-  if (num >= 1_000_000_000) return `${(num / 1_000_000_000).toFixed(1)}B`
-  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`
-  if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`
-  return `${num}`
+function formatKoreanNumber(num: number) {
+  if (num >= 1_000) {
+    const value = num / 10_000
+    if (value >= 10) {
+      return `${Math.round(value)}만`
+    }
+    if (value >= 1) {
+      return `${parseFloat(value.toFixed(1))}만`
+    }
+    return `${parseFloat(value.toFixed(2))}만`
+  }
+  return num.toLocaleString('ko-KR')
 }
 
 function formatDate(isoDate: string) {
@@ -42,16 +49,23 @@ export function VideoCard({ video, onChannelClick }: VideoCardProps) {
         </div>
         <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-wide text-indigo-500">
           <span className="rounded-xl bg-indigo-50 px-3 py-2 text-slate-600">
-            조회수 {formatNumber(video.views)}
+            조회수 {formatKoreanNumber(video.views)}
           </span>
           <span className="rounded-xl bg-indigo-50 px-3 py-2 text-slate-600">
-            좋아요 {formatNumber(video.likes)}
+            좋아요 {formatKoreanNumber(video.likes)}
           </span>
           <span className="rounded-xl bg-indigo-50 px-3 py-2 text-slate-600">
-            구독자 {formatNumber(video.channelSubscribers)}
+            구독자 {formatKoreanNumber(video.channelSubscribers)}
           </span>
           <span className="rounded-xl bg-indigo-50 px-3 py-2 text-slate-600">
-            총 영상수 {formatNumber(video.channelVideoCount)}
+            총 영상수 {formatKoreanNumber(video.channelVideoCount)}
+          </span>
+          <span className="rounded-xl bg-emerald-50 px-3 py-2 text-emerald-600">
+            비율{' '}
+            {video.channelSubscribers > 0
+              ? (video.views / video.channelSubscribers).toFixed(1)
+              : '∞'}
+            배
           </span>
         </div>
         <div className="grid grid-cols-2 gap-4 text-sm text-slate-600 md:grid-cols-3">
@@ -76,21 +90,15 @@ export function VideoCard({ video, onChannelClick }: VideoCardProps) {
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              기여도
+              영상 길이
             </span>
-            <span>{video.contribution ?? '-'}</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              성과도
+            <span>
+              {typeof video.durationSeconds === 'number'
+                ? `${Math.floor(video.durationSeconds / 60)}분 ${String(
+                    Math.floor(video.durationSeconds % 60),
+                  ).padStart(2, '0')}초`
+                : '정보 없음'}
             </span>
-            <span>{video.performance ?? '-'}</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              노출 확률
-            </span>
-            <span>{video.exposure ?? '-'}</span>
           </div>
         </div>
         {video.tags.length > 0 && (

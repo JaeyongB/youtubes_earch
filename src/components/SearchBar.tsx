@@ -50,42 +50,44 @@ export function SearchBar({
 
   return (
     <form
-      className="flex flex-col gap-6 rounded-3xl border border-white/70 bg-white/80 p-6 shadow-[0_24px_65px_-40px_rgba(79,70,229,0.65)] backdrop-blur"
+      className="flex flex-col gap-4 rounded-2xl border border-indigo-50 bg-white/95 p-4 shadow-sm backdrop-blur"
       onSubmit={handleSubmit}
     >
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:gap-6">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr),auto] lg:items-center">
         <div className="relative flex-1">
-          <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xl">
+          <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg">
             🔍
           </span>
           <input
-            className="w-full rounded-2xl border border-transparent bg-white px-5 py-3 pl-12 text-base font-medium text-slate-800 shadow-[0_30px_60px_-35px_rgba(79,70,229,0.65)] transition focus:border-brand focus:outline-none focus:ring-4 focus:ring-indigo-100"
-            placeholder="단어 또는 문장을 입력하세요"
+            className="w-full rounded-2xl border border-indigo-100 bg-white px-4 py-3 pl-11 text-sm font-medium text-slate-800 shadow-inner shadow-indigo-50 transition focus:border-brand focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            placeholder="찾고 싶은 키워드를 입력하세요"
             value={keyword}
             onChange={(event) => onKeywordChange(event.target.value)}
           />
         </div>
-        <div className="flex flex-wrap items-end gap-4">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <button
             type="button"
             onClick={onOpenApiKeyModal}
-            className="inline-flex h-[50px] items-center justify-center gap-2 rounded-2xl border border-brand/70 bg-gradient-to-r from-brand to-brand-light px-6 text-sm font-semibold text-white shadow-lg shadow-brand/30 transition hover:from-brand-dark hover:to-brand"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-brand/70 bg-gradient-to-r from-brand to-brand-light px-4 text-xs font-semibold text-white shadow-sm shadow-brand/20 transition hover:from-brand-dark hover:to-brand"
           >
             API 키 설정
           </button>
-          <label className={fieldLabelClass}>
+          <label className={`${fieldLabelClass} min-w-[120px]`}>
             <span>결과 수</span>
             <select
               value={maxResults}
               onChange={(event) => onMaxResultsChange(Number(event.target.value))}
               className={fieldControlClass}
             >
+              <option value={5}>5개</option>
+              <option value={10}>10개</option>
               <option value={20}>20개</option>
               <option value={50}>50개</option>
               <option value={100}>100개</option>
             </select>
           </label>
-          <label className={fieldLabelClass}>
+          <label className={`${fieldLabelClass} min-w-[120px]`}>
             <span>연도</span>
             <input
               type="number"
@@ -96,7 +98,7 @@ export function SearchBar({
               className={fieldControlClass}
             />
           </label>
-          <label className={fieldLabelClass}>
+          <label className={`${fieldLabelClass} min-w-[120px]`}>
             <span>국가</span>
             <select
               value={regionCode}
@@ -113,7 +115,7 @@ export function SearchBar({
           </label>
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           className={filterButtonClass(duration === 'any')}

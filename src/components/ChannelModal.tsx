@@ -1,5 +1,19 @@
 import type { ChannelDetail, ChannelInsights } from '../types/youtube'
 
+function formatKoreanNumber(num: number) {
+  if (num >= 1_000) {
+    const value = num / 10_000
+    if (value >= 10) {
+      return `${Math.round(value)}만`
+    }
+    if (value >= 1) {
+      return `${parseFloat(value.toFixed(1))}만`
+    }
+    return `${parseFloat(value.toFixed(2))}만`
+  }
+  return num.toLocaleString('ko-KR')
+}
+
 interface ChannelModalProps {
   detail: ChannelDetail
   insights: ChannelInsights
@@ -25,7 +39,7 @@ export function ChannelModal({ detail, insights, isOpen, onClose }: ChannelModal
       role="dialog"
       aria-modal="true"
     >
-      <div className="relative w-full max-w-5xl overflow-hidden rounded-3xl border border-white/70 bg-white shadow-[0_36px_80px_-40px_rgba(15,23,42,0.65)]">
+      <div className="relative w-full max-w-5xl overflow-hidden rounded-3xl border border-white/70 bg-white shadow-[0_36px_80px_-40px_rgba(15,23,42,0.65)]" style={{ transform: 'scale(0.85)', transformOrigin: 'center top' }}>
         <header className="flex items-start justify-between gap-6 border-b border-slate-100 bg-white/70 px-8 py-6 backdrop-blur">
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold text-slate-900">{detail.title}</h2>
@@ -101,10 +115,13 @@ export function ChannelModal({ detail, insights, isOpen, onClose }: ChannelModal
                     src={video.thumbnailUrl}
                     alt={video.title}
                   />
-                  <div className="grid gap-2">
+                  <div className="grid gap-1">
                     <strong className="text-base text-slate-800 group-hover:text-brand">
                       {video.title}
                     </strong>
+                    <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      조회수 {formatKoreanNumber(video.viewCount ?? 0)}
+                    </span>
                     <span className="text-sm text-slate-500 line-clamp-2">{video.description}</span>
                   </div>
                 </a>
@@ -132,7 +149,7 @@ export function ChannelModal({ detail, insights, isOpen, onClose }: ChannelModal
                     <strong className="text-base text-slate-800 group-hover:text-brand">
                       {video.title}
                     </strong>
-                    <span className="text-sm text-slate-500">조회수 {formatNumber(video.viewCount)}회</span>
+                    <span className="text-sm text-slate-500">조회수 {formatKoreanNumber(video.viewCount)}회</span>
                   </div>
                 </a>
               ))}
