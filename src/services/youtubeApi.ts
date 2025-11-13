@@ -205,22 +205,31 @@ function isVerticalShort(
   tags?: string[],
 ): boolean {
   if (typeof durationSeconds !== 'number') return false
-  if (durationSeconds > 170) return false
+  // YouTube Shorts: 최대 60초 (공식), 하지만 검색 결과에서는 더 관대하게 처리 (최대 600초)
+  // 왜냐하면 API 응답에서 정확한 지속 시간이 항상 반영되지 않을 수 있기 때문
+  if (durationSeconds > 600) return false
 
   const dims = getThumbnailDimensions(thumbnails)
   if (dims) {
     const ratio = dims.width / dims.height
     if (!Number.isFinite(ratio) || ratio === 0) return false
+    // 9:16 (0.5625) 세로 종횡비 확인
     const target = 9 / 16
-    if (Math.abs(ratio - target) <= 0.08) {
+    // ±15% 오차 허용 (더 관대한 범위)
+    if (Math.abs(ratio - target) <= 0.15) {
       return true
     }
+    // 매우 세로형 영상 (width < 75% of height)
     if (ratio < 0.75) {
       return true
     }
   }
 
-  if (tags && tags.some((tag) => tag.toLowerCase().includes('short'))) {
+  // "shorts", "short video", "vertical" 등의 태그 확인
+  if (tags && tags.some((tag) => {
+    const lowerTag = tag.toLowerCase()
+    return lowerTag.includes('short') || lowerTag.includes('vertical')
+  })) {
     return true
   }
 
@@ -326,6 +335,11 @@ export async function searchVideos({
       const remaining = sanitizedResultCount - searchItems.length
       const requestCount = Math.min(remaining, 50)
 
+      // Shorts 검색에서는 YouTube API의 videoDuration 필터를 사용하지 않음
+      // (API의 'short' 필터는 YouTube Shorts를 감지하지 않기 때문)
+      // 대신 isVerticalShort() 함수로 필터링함
+      const videoDurationParam = duration === 'short' ? undefined : DURATION_FILTER[duration]
+
       const { data } = await youtubeClient.get<SearchResponse>('/search', {
         params: {
           key: trimmedApiKey,
@@ -333,7 +347,7 @@ export async function searchVideos({
           part: 'snippet',
           type: 'video',
           maxResults: requestCount,
-          videoDuration: DURATION_FILTER[duration],
+          videoDuration: videoDurationParam,
           pageToken: nextPageToken,
           publishedAfter,
           publishedBefore,
