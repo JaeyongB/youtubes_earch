@@ -62,17 +62,17 @@ function App() {
 
   const sortButtonClass = (field: SortField, order: SortOrder) => {
     const isActive = sortField === field && sortOrder === order
-    return `inline-flex items-center justify-center rounded-xl border px-4 py-2 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+    return `inline-flex items-center justify-center rounded-lg border px-2 py-1 text-[10px] font-semibold transition focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-brand ${
       isActive
-        ? 'border-transparent bg-gradient-to-r from-brand to-brand-light text-white shadow-md shadow-brand/30'
+        ? 'border-transparent bg-gradient-to-r from-brand to-brand-light text-white shadow-sm shadow-brand/30'
         : 'border-indigo-100 bg-white text-brand-dark hover:border-brand hover:text-brand'
     }`
   }
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
-      <header className="sticky top-0 z-40 border-b border-slate-100 bg-slate-50/95 backdrop-blur" style={{ minHeight: '20vh' }}>
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6 md:px-8">
+      <header className="sticky top-0 z-40 border-b border-slate-100 bg-slate-50/95 backdrop-blur" style={{ minHeight: '10vh' }}>
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-3 md:px-8">
           <SearchBar
             keyword={keyword}
             onKeywordChange={setKeyword}
@@ -91,18 +91,18 @@ function App() {
             onExportExcel={handleExportExcel}
           />
 
-          <section className="flex flex-col gap-3 rounded-2xl border border-white/70 bg-white/90 p-4 shadow-[0_18px_45px_-40px_rgba(15,23,42,0.4)] backdrop-blur">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <strong className="text-sm font-semibold text-slate-700">대신 옵션</strong>
+          <section className="flex flex-col gap-1.5 rounded-xl border border-white/70 bg-white/90 p-2 shadow-[0_18px_45px_-40px_rgba(15,23,42,0.4)] backdrop-blur">
+            <div className="flex flex-wrap items-center justify-between gap-1.5">
+              <strong className="text-xs font-semibold text-slate-700">대신 옵션</strong>
               <button
                 type="button"
-                className="inline-flex items-center justify-center rounded-xl border border-indigo-100 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-brand hover:text-brand"
+                className="inline-flex items-center justify-center rounded-lg border border-indigo-100 bg-white px-2 py-1 text-[10px] font-semibold text-slate-600 transition hover:border-brand hover:text-brand"
                 onClick={handleSortReset}
               >
                 정렬 초기화
               </button>
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-1">
+            <div className="flex gap-1.5 overflow-x-auto pb-0.5">
               {(
                 [
                   { field: 'title', label: '제목' },
@@ -112,9 +112,9 @@ function App() {
                   { field: 'engagementRatio', label: '조회수/구독자' },
                 ] satisfies Array<{ field: SortField; label: string }>
               ).map(({ field, label }) => (
-                <div key={field} className="flex min-w-[150px] flex-col gap-2 rounded-2xl border border-indigo-100 bg-white p-3 shadow-sm">
-                  <span className="text-xs font-semibold text-slate-600">{label}</span>
-                  <div className="flex gap-2">
+                <div key={field} className="flex min-w-[120px] flex-col gap-1 rounded-xl border border-indigo-100 bg-white p-1.5 shadow-sm">
+                  <span className="text-[10px] font-semibold text-slate-600">{label}</span>
+                  <div className="flex gap-1">
                     <button
                       type="button"
                       className={sortButtonClass(field, 'asc')}
