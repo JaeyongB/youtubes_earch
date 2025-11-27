@@ -62,17 +62,17 @@ function App() {
 
   const sortButtonClass = (field: SortField, order: SortOrder) => {
     const isActive = sortField === field && sortOrder === order
-    return `inline-flex items-center justify-center rounded-lg border px-2 py-1 text-[10px] font-semibold transition focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-brand ${
+    return `inline-flex items-center justify-center rounded border w-4 h-4 text-[11px] font-bold transition ${
       isActive
-        ? 'border-transparent bg-gradient-to-r from-brand to-brand-light text-white shadow-sm shadow-brand/30'
+        ? 'border-transparent bg-gradient-to-r from-brand to-brand-light text-white shadow-sm'
         : 'border-indigo-100 bg-white text-brand-dark hover:border-brand hover:text-brand'
     }`
   }
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
-      <header className="sticky top-0 z-40 border-b border-slate-100 bg-slate-50/95 backdrop-blur" style={{ minHeight: '10vh' }}>
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-3 md:px-8">
+      <header className="sticky top-0 z-40 border-b border-slate-100 bg-slate-50/95 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-3 py-2 md:px-6">
           <SearchBar
             keyword={keyword}
             onKeywordChange={setKeyword}
@@ -91,48 +91,44 @@ function App() {
             onExportExcel={handleExportExcel}
           />
 
-          <section className="flex flex-col gap-1.5 rounded-xl border border-white/70 bg-white/90 p-2 shadow-[0_18px_45px_-40px_rgba(15,23,42,0.4)] backdrop-blur">
-            <div className="flex flex-wrap items-center justify-between gap-1.5">
-              <strong className="text-xs font-semibold text-slate-700">대신 옵션</strong>
-              <button
-                type="button"
-                className="inline-flex items-center justify-center rounded-lg border border-indigo-100 bg-white px-2 py-1 text-[10px] font-semibold text-slate-600 transition hover:border-brand hover:text-brand"
-                onClick={handleSortReset}
-              >
-                정렬 초기화
-              </button>
-            </div>
-            <div className="flex gap-1.5 overflow-x-auto pb-0.5">
-              {(
-                [
-                  { field: 'title', label: '제목' },
-                  { field: 'views', label: '조회수' },
-                  { field: 'likes', label: '좋아요' },
-                  { field: 'channelSubscribers', label: '구독자' },
-                  { field: 'engagementRatio', label: '조회수/구독자' },
-                ] satisfies Array<{ field: SortField; label: string }>
-              ).map(({ field, label }) => (
-                <div key={field} className="flex min-w-[120px] flex-col gap-1 rounded-xl border border-indigo-100 bg-white p-1.5 shadow-sm">
-                  <span className="text-[10px] font-semibold text-slate-600">{label}</span>
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      className={sortButtonClass(field, 'asc')}
-                      onClick={() => handleSort(field, 'asc')}
-                    >
-                      오름차순
-                    </button>
-                    <button
-                      type="button"
-                      className={sortButtonClass(field, 'desc')}
-                      onClick={() => handleSort(field, 'desc')}
-                    >
-                      내림차순
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <section className="flex items-center gap-1.5 rounded-lg border border-white/70 bg-white/90 p-1.5 shadow-[0_10px_30px_-20px_rgba(15,23,42,0.35)] backdrop-blur overflow-x-auto">
+            <strong className="text-[10px] font-bold text-slate-700 whitespace-nowrap">정렬</strong>
+            {(
+              [
+                { field: 'title', label: '제목' },
+                { field: 'views', label: '조회수' },
+                { field: 'likes', label: '좋아요' },
+                { field: 'channelSubscribers', label: '구독자' },
+                { field: 'engagementRatio', label: '비율' },
+              ] satisfies Array<{ field: SortField; label: string }>
+            ).map(({ field, label }) => (
+              <div key={field} className="flex items-center gap-0.5">
+                <span className="text-[9px] font-semibold text-slate-600 whitespace-nowrap">{label}</span>
+                <button
+                  type="button"
+                  className={sortButtonClass(field, 'asc')}
+                  onClick={() => handleSort(field, 'asc')}
+                  title={`${label} 오름차순`}
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  className={sortButtonClass(field, 'desc')}
+                  onClick={() => handleSort(field, 'desc')}
+                  title={`${label} 내림차순`}
+                >
+                  ↓
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              className="ml-auto inline-flex items-center justify-center rounded-md border border-indigo-100 bg-white px-1.5 py-0.5 text-[9px] font-bold text-slate-600 transition hover:border-brand hover:text-brand whitespace-nowrap"
+              onClick={handleSortReset}
+            >
+              초기화
+            </button>
           </section>
         </div>
       </header>
